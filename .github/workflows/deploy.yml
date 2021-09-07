@@ -1,12 +1,10 @@
-name: Reminders Deployment Pipeline
+
+name: Reminder Deployment Pipeline
 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ dev ]
-
-  pull_request:
-    branches: [ dev ]
+    branches: [dev]
 
 
   # Allows you to run this workflow manually from the Actions tab
@@ -18,16 +16,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Exec remote commands via SSH
+      - name: Deployment
         uses: appleboy/ssh-action@master
         with:
+          key: ${{ secrets.PRIVATE_KEY }}
           host: ${{ secrets.HOSTNAME }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
           script: |
             cd /var/www/zc_plugin_reminder/
-            git checkout dev
-            git pull origin dev
+            git stash
+            git pull
             yarn run holoInstall
             yarn run build
-            pm2 restart reminders_plugin
+            pm2 start reminders_plugin
